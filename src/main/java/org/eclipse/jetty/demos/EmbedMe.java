@@ -30,6 +30,7 @@ import java.nio.file.PathMatcher;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 public class EmbedMe
@@ -39,13 +40,27 @@ public class EmbedMe
         int port = 8080;
         Server server = new Server(port);
 
+        // Enable annotation scanning for webapps
+        Configuration.ClassList classlist = Configuration.ClassList
+            .setServerDefault(server);
+        classlist.addBefore(
+            "org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
+            "org.eclipse.jetty.annotations.AnnotationConfiguration");
+
+        // Find webapp - exploded directory or war file
         URI webResourceBase = findWebResourceBase(server.getClass().getClassLoader());
         System.err.println("Using BaseResource: " + webResourceBase);
+
+        // Create webapp
         WebAppContext context = new WebAppContext();
         context.setBaseResource(Resource.newResource(webResourceBase));
         context.setContextPath("/");
         context.setWelcomeFiles(new String[]{"index.html", "welcome.html"});
+
+        // Make webapp use embedded classloader
         context.setParentLoaderPriority(true);
+
+        // Start Server
         server.setHandler(context);
         server.start();
         server.join();
