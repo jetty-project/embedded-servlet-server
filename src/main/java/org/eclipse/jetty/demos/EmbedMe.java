@@ -28,18 +28,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 
-import org.eclipse.jetty.annotations.AnnotationConfiguration;
-import org.eclipse.jetty.plus.webapp.EnvConfiguration;
-import org.eclipse.jetty.plus.webapp.PlusConfiguration;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.resource.Resource;
-import org.eclipse.jetty.webapp.Configuration;
-import org.eclipse.jetty.webapp.FragmentConfiguration;
-import org.eclipse.jetty.webapp.JettyWebXmlConfiguration;
-import org.eclipse.jetty.webapp.MetaInfConfiguration;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.webapp.WebInfConfiguration;
-import org.eclipse.jetty.webapp.WebXmlConfiguration;
 
 public class EmbedMe
 {
@@ -52,23 +43,11 @@ public class EmbedMe
         System.err.println("Using BaseResource: " + webResourceBase);
         WebAppContext context = new WebAppContext();
         context.setBaseResource(Resource.newResource(webResourceBase));
-        context.setConfigurations(new Configuration[]
-            {
-                new AnnotationConfiguration(),
-                new WebInfConfiguration(),
-                new WebXmlConfiguration(),
-                new MetaInfConfiguration(),
-                new FragmentConfiguration(),
-                new EnvConfiguration(),
-                new PlusConfiguration(),
-                new JettyWebXmlConfiguration()
-            });
-
         context.setContextPath("/");
+        context.setWelcomeFiles(new String[]{"index.html", "welcome.html"});
         context.setParentLoaderPriority(true);
         server.setHandler(context);
         server.start();
-        server.dump(System.err);
         server.join();
     }
 

@@ -7,12 +7,10 @@ WAR file being produced by this project.
 Quick Start
 -----------
 
-    $ mvn clean install exec:exec
+    $ mvn clean compile exec:exec
 
 Open your web browser to
 
-    http://localhost:8080/  for the root of the project
-
-    http://localhost:8080/test/  to show the annotation working as expected
+    http://localhost:8080/  for the root of the webapp
 
 
