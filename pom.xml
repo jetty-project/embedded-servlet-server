@@ -26,14 +26,14 @@
     <exec.plugin.version>3.0.0</exec.plugin.version>
     <license.plugin.version>4.1</license.plugin.version>
 
-    <servlet.api.version>4.0.0</servlet.api.version>
+    <servlet.api.version>4.0.2</servlet.api.version>
     <jetty.version>10.0.3</jetty.version>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
       <version>${servlet.api.version}</version>
       <scope>provided</scope>
     </dependency>
