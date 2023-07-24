@@ -7,7 +7,9 @@ WAR file being produced by this project.
 Quick Start
 -----------
 
-    $ mvn clean compile exec:exec
+Use Maven 3.9.1 (or better)
+
+    $ mvn clean install exec:exec
 
 Open your web browser to
 
