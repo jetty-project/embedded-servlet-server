@@ -40,3 +40,12 @@ updates:
         versions: [ ">=12.0.0" ]
       # Never update servlet api
       - dependency-name: "jakarta.servlet:jakarta.servlet-api"
+
+  - package-ecosystem: "maven"
+    directory: "/"
+    target-branch: "jetty-12.0.x"
+    schedule:
+      interval: "daily"
+    ignore:
+      # Never update servlet api
+      - dependency-name: "jakarta.servlet:jakarta.servlet-api"
