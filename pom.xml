@@ -47,6 +47,12 @@
       <artifactId>jetty-annotations</artifactId>
       <version>${jetty.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty.toolchain</groupId>
+      <artifactId>jetty-test-helper</artifactId>
+      <version>6.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <pluginManagement>
@@ -131,7 +137,7 @@
             <configuration>
               <rules>
                 <requireMavenVersion>
-                  <version>[3.0.0,)</version>
+                  <version>[3.9.2,)</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
                   <version>[11,)</version>
