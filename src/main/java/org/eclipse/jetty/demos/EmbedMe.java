@@ -62,22 +62,20 @@ public class EmbedMe
 
     private static Resource findBaseResource(ClassLoader classLoader)
     {
-        String webResourceRef = "WEB-INF/html/index.html";
-
         try
         {
             // Look for resource in classpath (this is the best choice when working with a jar/war archive)
-            URL webXml = classLoader.getResource('/' + webResourceRef);
+            URL webXml = classLoader.getResource("/WEB-INF/web.xml");
             if (webXml != null)
             {
-                URI uri = webXml.toURI().resolve("..").normalize();
+                URI uri = webXml.toURI().resolve("../..").normalize();
                 LOG.info("Found WebResourceBase (Using ClassLoader reference) {}", uri);
                 return Resource.newResource(uri);
             }
         }
         catch (URISyntaxException | MalformedURLException e)
         {
-            throw new RuntimeException("Bad ClassPath reference for: " + webResourceRef, e);
+            throw new RuntimeException("Bad ClassPath reference for: WEB-INF", e);
         }
 
         // Look for resource in common file system paths
@@ -96,31 +94,25 @@ public class EmbedMe
                         .orElse(null);
                     if (embeddedServletServerDir != null)
                     {
-                        Path resourceFile = embeddedServletServerDir.resolve(webResourceRef);
-                        if (Files.isRegularFile(resourceFile))
-                        {
-                            Path parentDir = resourceFile.getParent();
-                            LOG.info("Found WebResourceBase (Using /target/ Path) {}", parentDir);
-                            return Resource.newResource(parentDir);
-                        }
+                        LOG.info("Found WebResourceBase (Using /target/ Path) {}", embeddedServletServerDir);
+                        return Resource.newResource(embeddedServletServerDir);
                     }
                 }
             }
 
             // Try the source path next
-            Path srcWebapp = pwd.resolve("src/main/webapp/" + webResourceRef);
+            Path srcWebapp = pwd.resolve("src/main/webapp/");
             if (Files.exists(srcWebapp))
             {
-                Path parentDir = srcWebapp.getParent();
-                LOG.info("WebResourceBase (Using /src/main/webapp/ Path) {}", parentDir);
-                return Resource.newResource(parentDir);
+                LOG.info("WebResourceBase (Using /src/main/webapp/ Path) {}", srcWebapp);
+                return Resource.newResource(srcWebapp);
             }
         }
         catch (Throwable t)
         {
-            throw new RuntimeException("Unable to find web resource in file system: " + webResourceRef, t);
+            throw new RuntimeException("Unable to find web resource in file system", t);
         }
 
-        throw new RuntimeException("Unable to find web resource ref: " + webResourceRef);
+        throw new RuntimeException("Unable to find web resource ref");
     }
 }
