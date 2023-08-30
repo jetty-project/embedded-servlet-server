@@ -1,4 +1,4 @@
-Example: Embedded Jetty w/ Servlet 4.0 and Annotation
+Example: Embedded Jetty w/ Servlet 5.0 and Annotation
 =====================================================
 
 This is a maven project setup as a WAR packaging, with an EmbedMe class in the test scope that starts an embedded jetty of the
@@ -7,7 +7,7 @@ WAR file being produced by this project.
 Quick Start
 -----------
 
-    $ mvn clean compile exec:exec
+    $ mvn clean package exec:exec
 
 Open your web browser to
 
