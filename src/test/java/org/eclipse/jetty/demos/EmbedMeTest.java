@@ -18,12 +18,12 @@
 
 package org.eclipse.jetty.demos;
 
-import java.io.IOException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.junit.jupiter.api.AfterEach;
@@ -37,6 +37,7 @@ import static org.hamcrest.Matchers.is;
 public class EmbedMeTest
 {
     private Server server;
+    private HttpClient client;
 
     @BeforeEach
     public void startServer() throws Exception
@@ -45,22 +46,27 @@ public class EmbedMeTest
         server.start();
     }
 
-    @AfterEach
-    public void stopServer()
+    @BeforeEach
+    public void startClient() throws Exception
     {
+        client = new HttpClient();
+        client.start();
+    }
+
+    @AfterEach
+    public void stopAll()
+    {
+        LifeCycle.stop(client);
         LifeCycle.stop(server);
     }
 
     @Test
-    public void testGetWelcome() throws IOException, InterruptedException
+    public void testGetWelcome() throws InterruptedException, ExecutionException, TimeoutException
     {
-        HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(server.getURI().resolve("/"))
-            .GET()
-            .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        assertThat(response.statusCode(), is(200));
-        assertThat(response.body(), containsString("<title>Welcome File</title>"));
+        Request request = client.newRequest(server.getURI().resolve("/"))
+            .method("GET");
+        ContentResponse response = request.send();
+        assertThat(response.getStatus(), is(200));
+        assertThat(response.getContentAsString(), containsString("<title>Welcome File</title>"));
     }
 }
