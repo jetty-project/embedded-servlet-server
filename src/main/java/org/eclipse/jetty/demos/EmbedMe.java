@@ -18,55 +18,64 @@
 
 package org.eclipse.jetty.demos;
 
-import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.DirectoryStream;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
+import java.util.stream.Stream;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EmbedMe
 {
+    private static final Logger LOG = LoggerFactory.getLogger(EmbedMe.class);
+
     public static void main(String[] args) throws Exception
     {
         int port = 8080;
-        Server server = new Server(port);
-
-        URI webResourceBase = findWebResourceBase(server.getClass().getClassLoader());
-        System.err.println("Using BaseResource: " + webResourceBase);
-        WebAppContext context = new WebAppContext();
-        context.setBaseResource(Resource.newResource(webResourceBase));
-        context.setContextPath("/");
-        context.setWelcomeFiles(new String[]{"index.html", "welcome.html"});
-        context.setParentLoaderPriority(true);
-        server.setHandler(context);
+        Server server = newServer(port);
         server.start();
         server.join();
     }
 
-    private static URI findWebResourceBase(ClassLoader classLoader)
+    public static Server newServer(int port) throws IOException
     {
-        String webResourceRef = "WEB-INF/web.xml";
+        Server server = new Server(port);
+
+        Resource baseResource = findBaseResource(EmbedMe.class.getClassLoader());
+        LOG.info("Using BaseResource: {}", baseResource);
+        WebAppContext context = new WebAppContext();
+        context.setBaseResource(baseResource);
+        context.setContextPath("/");
+        context.setWelcomeFiles(new String[]{"index.html", "welcome.html"});
+        context.setParentLoaderPriority(true);
+        server.setHandler(context);
+        return server;
+    }
+
+    private static Resource findBaseResource(ClassLoader classLoader)
+    {
+        String webResourceRef = "WEB-INF/html/index.html";
 
         try
         {
-            // Look for resource in classpath (best choice when working with archive jar/war file)
+            // Look for resource in classpath (this is the best choice when working with a jar/war archive)
             URL webXml = classLoader.getResource('/' + webResourceRef);
             if (webXml != null)
             {
                 URI uri = webXml.toURI().resolve("..").normalize();
-                System.err.printf("WebResourceBase (Using ClassLoader reference) %s%n", uri);
-                return uri;
+                LOG.info("Found WebResourceBase (Using ClassLoader reference) {}", uri);
+                return Resource.newResource(uri);
             }
         }
-        catch (URISyntaxException e)
+        catch (URISyntaxException | MalformedURLException e)
         {
             throw new RuntimeException("Bad ClassPath reference for: " + webResourceRef, e);
         }
@@ -74,25 +83,25 @@ public class EmbedMe
         // Look for resource in common file system paths
         try
         {
-            Path pwd = new File(System.getProperty("user.dir")).toPath().toRealPath();
-            FileSystem fs = pwd.getFileSystem();
-
-            // Try the generated maven path first
-            PathMatcher matcher = fs.getPathMatcher("glob:**/embedded-servlet-*");
-            try (DirectoryStream<Path> dir = Files.newDirectoryStream(pwd.resolve("target")))
+            Path pwd = Path.of(System.getProperty("user.dir")).toAbsolutePath();
+            Path targetDir = pwd.resolve("target");
+            if (Files.isDirectory(targetDir))
             {
-                for (Path path : dir)
+                try (Stream<Path> listing = Files.list(targetDir))
                 {
-                    if (Files.isDirectory(path) && matcher.matches(path))
+                    Path embeddedServletServerDir = listing
+                        .filter(Files::isDirectory)
+                        .filter((path) -> path.getFileName().toString().startsWith("embedded-servlet-server-"))
+                        .findFirst()
+                        .orElse(null);
+                    if (embeddedServletServerDir != null)
                     {
-                        // Found a potential directory
-                        Path possible = path.resolve(webResourceRef);
-                        // Does it have what we need?
-                        if (Files.exists(possible))
+                        Path resourceFile = embeddedServletServerDir.resolve(webResourceRef);
+                        if (Files.isRegularFile(resourceFile))
                         {
-                            URI uri = path.toUri();
-                            System.err.printf("WebResourceBase (Using discovered /target/ Path) %s%n", uri);
-                            return uri;
+                            Path parentDir = resourceFile.getParent();
+                            LOG.info("Found WebResourceBase (Using /target/ Path) {}", parentDir);
+                            return Resource.newResource(parentDir);
                         }
                     }
                 }
@@ -102,9 +111,9 @@ public class EmbedMe
             Path srcWebapp = pwd.resolve("src/main/webapp/" + webResourceRef);
             if (Files.exists(srcWebapp))
             {
-                URI uri = srcWebapp.getParent().toUri();
-                System.err.printf("WebResourceBase (Using /src/main/webapp/ Path) %s%n", uri);
-                return uri;
+                Path parentDir = srcWebapp.getParent();
+                LOG.info("WebResourceBase (Using /src/main/webapp/ Path) {}", parentDir);
+                return Resource.newResource(parentDir);
             }
         }
         catch (Throwable t)
