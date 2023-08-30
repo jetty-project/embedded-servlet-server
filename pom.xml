@@ -9,8 +9,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
 
     <maven.clean.plugin.version>3.3.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
@@ -26,24 +26,24 @@
     <exec.plugin.version>3.1.0</exec.plugin.version>
     <license.plugin.version>4.2</license.plugin.version>
 
-    <jetty.version>11.0.15</jetty.version>
+    <jetty.version>12.0.0</jetty.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
-      <version>5.0.0</version>
+      <version>6.0.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-webapp</artifactId>
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-webapp</artifactId>
       <version>${jetty.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-annotations</artifactId>
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-annotations</artifactId>
       <version>${jetty.version}</version>
     </dependency>
     <dependency>

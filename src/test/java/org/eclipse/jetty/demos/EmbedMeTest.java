@@ -61,6 +61,6 @@ public class EmbedMeTest
             .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         assertThat(response.statusCode(), is(200));
-        assertThat(response.body(), containsString("<title>Content from WEB-INF/html</title>"));
+        assertThat(response.body(), containsString("<title>Welcome File</title>"));
     }
 }
